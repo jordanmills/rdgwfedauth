@@ -29,7 +29,7 @@ Try {
     $body += "Environment:"
     Get-ChildItem "env:" |
     ForEach-Object {
-        $body += "$($_.Name) =  $($_.value)"
+        $arrbody += "$($_.Name) =  $($_.value)"
     }
 } Catch {}
 
