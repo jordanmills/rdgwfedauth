@@ -33,6 +33,18 @@ Try {
 } Catch {}
 
 Try {
+    $arrbody += "x-ms-client-principal-name_hash: $(Request.Headers["x-ms-client-principal-name"])"
+} Catch {}
+
+Try {
+    $arrbody += "x-ms-client-principal-name_prop: $(Request.Headers.x-ms-client-principal-name)"
+} Catch {}
+
+Try {
+    $arrbody += [string]::join("`r`n",($Request.Headers | Get-Member))
+} Catch {}
+
+Try {
     $arrbody += "x-ms-client-principal-name: $(Request.Headers["x-ms-client-principal-name"])"
 } Catch {}
 
