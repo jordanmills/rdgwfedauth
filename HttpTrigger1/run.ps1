@@ -20,14 +20,19 @@ if ($name) {
 }
 #>
 [string[]]$body = @();
-$body += "Route:"
-$body += "hostname = $hostname"
 
-$body += "Headers:"
-$Request.Headers.keys |
-ForEach-Object {
-    $body += "$_ =  $($Request.Headers.GetItem($_))"
-}
+Try {
+    $body += "Route:"
+    $body += "hostname = $hostname"
+} Catch {}
+
+Try {
+    $body += "Headers:"
+    $Request.Headers.keys |
+    ForEach-Object {
+        $body += "$_ =  $($Request.Headers.GetItem($_))"
+    }
+} Catch {}
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
