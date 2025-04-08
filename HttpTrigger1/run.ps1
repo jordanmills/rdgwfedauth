@@ -32,6 +32,10 @@ Try {
     $arrbody += "rdgwfedauth_gwport = $($env:APPSETTING_rdgwfedauth_gwport)"
 } Catch {}
 
+Try {
+    $arrbody += "x-ms-client-principal-name: $(Request.Headers["x-ms-client-principal-name"])"
+} Catch {}
+
 <#
 Try {
     $arrbody += "Environment:"
@@ -50,12 +54,12 @@ Try {
         $arrbody += "$($_.name) =  $($_.value)"
     }
 } Catch {}
-#>
 
 Try {
     $arrbody += "Headers:"
     $arrbody += $Request.Headers | ConvertTo-Json -Compress
 } Catch {}
+#>
 
 $body = [string]::join("`r`n",$arrbody)
 
