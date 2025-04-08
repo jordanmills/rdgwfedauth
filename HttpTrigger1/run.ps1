@@ -42,12 +42,19 @@ Try {
 } Catch {}
 #>
 
+<#
 Try {
     $arrbody += "Headers:"
     $Request.Headers |
     ForEach-Object {
         $arrbody += "$($_.name) =  $($_.value)"
     }
+} Catch {}
+#>
+
+Try {
+    $arrbody += "Headers:"
+    $arrbody += $Request.Headers | ConvertTo-Json -Compress
 } Catch {}
 
 $body = [string]::join("`r`n",$arrbody)
