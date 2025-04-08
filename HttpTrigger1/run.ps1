@@ -19,6 +19,8 @@ if ($name) {
     $body = "Hello, $name. This HTTP triggered function executed successfully."
 }
 #>
+Write-Information "New response"
+
 [string[]]$arrbody = @();
 
 Try {
@@ -26,22 +28,25 @@ Try {
 } Catch {}
 
 Try {
-    $body += "Environment:"
+    $arrbody += "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
+    $arrbody += "rdgwfedauth_gwport = $($env:APPSETTING_rdgwfedauth_gwport)"
+} Catch {}
+
+Try {
+    $arrbody += "Environment:"
     Get-ChildItem "env:" |
     ForEach-Object {
         $arrbody += "$($_.Name) =  $($_.value)"
     }
 } Catch {}
 
-<#
 Try {
-    $body += "Headers:"
-    $Request.Headers.keys |
+    $arrbody += "Headers:"
+    $Request.Headers |
     ForEach-Object {
-        $body += "$_ =  $($Request.Headers.GetItem($_))"
+        $arrbody += "$_.name =  $($_.value)"
     }
 } Catch {}
-#>
 
 $body = [string]::join("`r`n",$arrbody)
 
