@@ -25,6 +25,14 @@ Try {
     $arrbody += "hostname = $($Request.params.hostname)"
 } Catch {}
 
+Try {
+    $body += "Environment:"
+    Get-ChildItem "env:" |
+    ForEach-Object {
+        $body += "$($_.Name) =  $($_.value)"
+    }
+} Catch {}
+
 <#
 Try {
     $body += "Headers:"
