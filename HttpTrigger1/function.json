@@ -6,9 +6,9 @@
       "direction": "in",
       "name": "Request",
       "methods": [
-        "get",
-        "post"
-      ]
+        "get"
+      ],
+      "route": "hostname/{hostname}"
     },
     {
       "type": "http",

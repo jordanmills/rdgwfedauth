@@ -1,7 +1,7 @@
 using namespace System.Net
 
 # Input bindings are passed in via param block.
-param($Request, $TriggerMetadata)
+param($Request, $hostname, $TriggerMetadata)
 
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
@@ -19,8 +19,15 @@ if ($name) {
     $body = "Hello, $name. This HTTP triggered function executed successfully."
 }
 #>
+[string[]]$body = @();
+$body += "Route:"
+$body += "hostname = $hostname"
 
-$body = $Request.Headers
+$body += "Headers:"
+$Request.Headers.keys |
+ForEach-Object {
+    $body += "$_ =  $($Request.Headers.GetItem($_))"
+}
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
