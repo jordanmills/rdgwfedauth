@@ -1,7 +1,7 @@
 using namespace System.Net
 
 # Input bindings are passed in via param block.
-param($Request, $hostname, $TriggerMetadata)
+param($Request, $TriggerMetadata)
 
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
@@ -23,7 +23,7 @@ if ($name) {
 
 Try {
     $body += "Route:"
-    $body += "hostname = $hostname"
+    $body += "hostname = $Request.params.hostname"
 } Catch {}
 
 Try {
