@@ -46,7 +46,7 @@ Try {
     $arrbody += "Headers:"
     $Request.Headers |
     ForEach-Object {
-        $arrbody += "$_.name =  $($_.value)"
+        $arrbody += "$($_.name) =  $($_.value)"
     }
 } Catch {}
 
