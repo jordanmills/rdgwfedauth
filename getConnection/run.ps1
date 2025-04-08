@@ -17,17 +17,15 @@ use multimon:i:0
 
 $rdgwfedauth_hostname = $Request.params.hostname
 $rdgwfedauth_gwhost = $env:APPSETTING_rdgwfedauth_gwhost
-$rdgwfedauth_gwport = $env:APPSETTING_rdgwfedauth_gwport
 $rdgwfedauth_username = $Request.Headers["x-ms-client-principal-name"]
 
 Write-Output "rdgwfedauth_hostname = $rdgwfedauth_hostname"
 Write-Output "rdgwfedauth_gwhost = $rdgwfedauth_gwhost"
-Write-Output "rdgwfedauth_gwport = $rdgwfedauth_gwport"
 Write-Output "rdgwfedauth_username = $rdgwfedauth_username"
 
 $Response = $null
 
-if (-not ($rdgwfedauth_hostname -and $rdgwfedauth_gwhost)) {
+if (-not ($rdgwfedauth_gwhost)) {
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::InternalServerError
         Body = "Internal server error.  Required configuration keys are missing."
@@ -41,14 +39,14 @@ if (-not $Request.Headers["x-ms-client-principal-name"]) {
     })
 }
 
-if (-not ($Request.params.hostname -match '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9](\:\d+)?$')) {
+if (-not ($Request.params.hostname -match '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$')) {
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::BadRequest
         Body = "Bad Request.  Host name not valid: $($Request.params.hostname)"
     })
 }
 
-if ((-not $Response) -and $rdgwfedauth_hostname -and $rdgwfedauth_gwhost -and $rdgwfedauth_gwport -and $rdgwfedauth_username) {
+if ((-not $Response) -and $rdgwfedauth_hostname -and $rdgwfedauth_gwhost -and $rdgwfedauth_username) {
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body = $content.replace('{0}',$rdgwfedauth_hostname).replace('{1}',$rdgwfedauth_gwhost).replace('{2}',$rdgwfedauth_username)
