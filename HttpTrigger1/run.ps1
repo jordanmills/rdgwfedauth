@@ -19,13 +19,13 @@ if ($name) {
     $body = "Hello, $name. This HTTP triggered function executed successfully."
 }
 #>
-[string[]]$body = @();
+[string[]]$arrbody = @();
 
 Try {
-    $body += "Route:"
-    $body += "hostname = $Request.params.hostname"
+    $arrbody += "hostname = $($Request.params.hostname)"
 } Catch {}
 
+<#
 Try {
     $body += "Headers:"
     $Request.Headers.keys |
@@ -33,6 +33,9 @@ Try {
         $body += "$_ =  $($Request.Headers.GetItem($_))"
     }
 } Catch {}
+#>
+
+$body = [string]::join("`r`n",$arrbody)
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
