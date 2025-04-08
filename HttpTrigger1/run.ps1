@@ -32,6 +32,7 @@ Try {
     $arrbody += "rdgwfedauth_gwport = $($env:APPSETTING_rdgwfedauth_gwport)"
 } Catch {}
 
+<#
 Try {
     $arrbody += "Environment:"
     Get-ChildItem "env:" |
@@ -39,6 +40,7 @@ Try {
         $arrbody += "$($_.Name) =  $($_.value)"
     }
 } Catch {}
+#>
 
 Try {
     $arrbody += "Headers:"
