@@ -106,8 +106,8 @@ Write-Output "Almost to processing"
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
     # connect to key vault
     # create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
-    # figure out where to put token in RDP file
-    #$rdpfile = Get-RdpFile -InputFile "template"
+    # sign token: https://github.com/Azure/azure-devtestlab/blob/544d203c22bc3efc28781ffd6ef6d31b0c7e6ab2/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
+    # sign rdp file: https://github.com/gabriel-sztejnworcel/pyrdgw
 
     $securesettings = @{
         'username:s:'='Username';
@@ -115,6 +115,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         'alternate full address:s:'='Alternate Full Address'
         'gatewaycredentialssource:i:5'='GatewayCredentialsSource'
         'gatewayaccesstoken:s:'='GatewayAccesstoken'
+        #'endpointfedauth:s:'='?'
     }
     $othersettings = @{
         'pcb:s:'='PCB';
@@ -161,7 +162,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         'eventloguploadaddress:s:'='EventLogUploadAddress'
     }
     
-    $rdpfile_output = $content.split("[`r`n]") |
+    $rdpfile_output = $rdpfile.split("[`r`n]") |
     ForEach-Object {
         if (-not $securesettings.ContainsKey($_.split(":",3)[0]) ) {
             $rdpfile_output += "$_`r`n"
@@ -172,6 +173,9 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
     $rdpfile_output += "alternate full address:s:$($Request.params.hostname)`r`n"
     $rdpfile_output += "gatewayhostname:s:$($env:APPSETTING_rdgwfedauth_gwhost)`r`n"
     $rdpfile_output += "username:s:$($Request.Headers["x-ms-client-principal-name"])`r`n"
+    $rdpfile_output += "username:s:$($Request.Headers["x-ms-client-principal-name"])`r`n"
+    $rdpfile_output += "gatewaycredentialssource:i:1`r`n"
+    $rdpfile_output += "gatewayaccesstoken:s:$('Token_Goes_here=')`r`n"
 
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
