@@ -109,7 +109,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
 
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body = rdpfile #$content.replace('{0}',$Request.params.hostname).replace('{1}',$env:APPSETTING_rdgwfedauth_gwhost).replace('{2}',$Request.Headers["x-ms-client-principal-name"])
+        Body = $rdpfile #$content.replace('{0}',$Request.params.hostname).replace('{1}',$env:APPSETTING_rdgwfedauth_gwhost).replace('{2}',$Request.Headers["x-ms-client-principal-name"])
         #ContentType = 'application/octet-stream'
     })
 }
