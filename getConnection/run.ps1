@@ -6,7 +6,7 @@ param($Request, $TriggerMetadata)
 # Write to the Azure Functions log stream.
 Write-Output "PowerShell HTTP trigger function processed a request."
 
-$content = @'
+$rdpfile = @'
 authentication level:i:0
 full address:s:{0}
 gatewayhostname:s:{1}
@@ -16,7 +16,7 @@ use multimon:i:0
 prompt for credentials:i:1
 '@
 
-$content = @'
+$rdpfile = @'
 full address:s:{1}
 alternate full address:s:{1}
 username:s:{2}
@@ -107,7 +107,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
     # connect to key vault
     # create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
     # figure out where to put token in RDP file
-    $rdpfile = Get-RdpFile -InputFile "template"
+    #$rdpfile = Get-RdpFile -InputFile "template"
 
     $securesettings = @{
         'username:s:'='Username';
@@ -161,7 +161,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         'eventloguploadaddress:s:'='EventLogUploadAddress'
     }
     
-    $rdpfile_output = $rdpfile.split("[`r`n]") |
+    $rdpfile_output = $content.split("[`r`n]") |
     ForEach-Object {
         if (-not $securesettings.ContainsKey($_.split(":",3)[0]) ) {
             $rdpfile_output += "$_`r`n"
@@ -194,7 +194,6 @@ if (-not $Response) {
         ContentType = 'application/octet-stream'
     })
 }
-#>
 
 function Get-RdpFile {
     param (
@@ -268,3 +267,4 @@ function Get-RdpFile {
 
     $rdpfile_output
 }
+#>
