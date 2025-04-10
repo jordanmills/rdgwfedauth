@@ -11,4 +11,4 @@ __queuestorage__
 __azurite_db*__.json
 
 # example code
-CreateToken.cs
+.examples/*
