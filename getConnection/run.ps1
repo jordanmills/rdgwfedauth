@@ -101,10 +101,12 @@ if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rd
 }
 #>
 
+Write-Output "Almost to processing"
+
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
-    // connect to key vault
-    // create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
-    // figure out where to put token in RDP file
+    # connect to key vault
+    # create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
+    # figure out where to put token in RDP file
     $rdpfile = Get-RdpFile -InputFile "template"
 
     $Response = ([HttpResponseContext]@{
