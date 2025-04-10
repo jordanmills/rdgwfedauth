@@ -107,7 +107,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
     # connect to key vault
     # create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
     # figure out where to put token in RDP file
-    #$rdpfile = Get-RdpFile -InputFile "template"
+    $rdpfile = Get-RdpFile -InputFile "template"
 
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
