@@ -91,6 +91,7 @@ if (-not ($Request.params.hostname -match '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9
     })
 }
 
+<#
 if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"])) {
     Write-Output "Failure: Unidentified"
     $Response = ([HttpResponseContext]@{
@@ -98,6 +99,7 @@ if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rd
         Body = "Internal server error.  Unidentified failure."
     })
 }
+#>
 
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
     // connect to key vault
