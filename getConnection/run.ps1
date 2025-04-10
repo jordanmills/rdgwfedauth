@@ -65,7 +65,6 @@ Write-Output "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-n
 
 Write-Output $Request.Headers
 
-<##
 $Response = $null
 
 if (-not ($env:APPSETTING_rdgwfedauth_gwhost)) {
@@ -102,14 +101,14 @@ if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rd
 
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
     // connect to key vault
-    // create token https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
+    // create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
     // figure out where to put token in RDP file
     $rdpfile = Get-RdpFile -InputFile "template"
 
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
-        Body = $content.replace('{0}',$Request.params.hostname).replace('{1}',$env:APPSETTING_rdgwfedauth_gwhost).replace('{2}',$Request.Headers["x-ms-client-principal-name"])
-        ContentType = 'application/octet-stream'
+        Body = rdpfile #$content.replace('{0}',$Request.params.hostname).replace('{1}',$env:APPSETTING_rdgwfedauth_gwhost).replace('{2}',$Request.Headers["x-ms-client-principal-name"])
+        #ContentType = 'application/octet-stream'
     })
 }
 
@@ -119,6 +118,7 @@ if ($Response) {
     Write-Output "Failure: response missing, this should not happen"
 }
 
+<#
 if (-not $Response) {
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
@@ -126,6 +126,7 @@ if (-not $Response) {
         ContentType = 'application/octet-stream'
     })
 }
+#>
 
 function Get-RdpFile {
     param (
@@ -199,4 +200,3 @@ function Get-RdpFile {
 
     return $rdpfile_output
 }
-##>
