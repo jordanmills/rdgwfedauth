@@ -105,7 +105,9 @@ function Get-RdGwToken
             }
         } else {
             # in azure running against key vault
+            "resource URI is https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
             $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
+            Write-Output "Access token is $accesstoken"
 
             $queryUrl = "$resourceURI$rdgwfedauth_keyvaultkey/encrypt?api-version=2016-10-01"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
