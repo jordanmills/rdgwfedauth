@@ -77,6 +77,10 @@ function Get-RdGwToken
     }
     Process
     {
+        Write-Information $machinehost
+        Write-Information $port
+        Write-Information (Get-PosixLifetime)
+
         $machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
 

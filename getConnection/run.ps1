@@ -59,6 +59,7 @@ enablerdsaadauth:i:0
 #$env:APPSETTING_rdgwfedauth_gwhost = $env:APPSETTING_rdgwfedauth_gwhost
 #$Request.Headers["x-ms-client-principal-name"] = $Request.Headers["x-ms-client-principal-name"]
 
+<#
 Write-Output "rdgwfedauth_hostname = $($Request.params.hostname)"
 Write-Output "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
 Write-Output "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-name"])"
@@ -70,6 +71,7 @@ Write-Output 'end $Request.Headers'
 Write-Output 'Env:'
 Get-ChildItem env:\*
 Write-Output 'end Env:'
+#>
 
 $Response = $null
 
