@@ -12,3 +12,6 @@ __azurite_db*__.json
 
 # example code
 .examples/*
+
+# Do not exclude modules
+!Modules/**

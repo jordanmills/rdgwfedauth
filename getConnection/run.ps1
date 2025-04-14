@@ -64,9 +64,10 @@ Write-Output "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
 Write-Output "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-name"])"
 
 Write-Output '$Request.Headers'
-Write-Output $Request.Headers
-Write-Output 'Env'
-Get-ChildItem env:\*
+$Request.Headers
+Write-Output 
+#Write-Output 'Env:'
+#Get-ChildItem env:\*
 
 $Response = $null
 
