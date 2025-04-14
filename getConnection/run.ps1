@@ -63,7 +63,10 @@ Write-Output "rdgwfedauth_hostname = $($Request.params.hostname)"
 Write-Output "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
 Write-Output "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-name"])"
 
+Write-Output '$Request.Headers'
 Write-Output $Request.Headers
+Write-Output 'Env'
+Get-ChildItem env:\*
 
 $Response = $null
 
@@ -105,8 +108,8 @@ Write-Output "Almost to processing"
 
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
     # connect to key vault
-    # create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
-    # sign token: https://github.com/Azure/azure-devtestlab/blob/544d203c22bc3efc28781ffd6ef6d31b0c7e6ab2/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
+    # done: create token? https://github.com/Azure/azure-devtestlab/blob/master/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
+    # done: sign token: https://github.com/Azure/azure-devtestlab/blob/544d203c22bc3efc28781ffd6ef6d31b0c7e6ab2/samples/DevTestLabs/GatewaySample/src/RDGatewayAPI/Functions/CreateToken.cs
     # sign rdp file: https://github.com/gabriel-sztejnworcel/pyrdgw
 
     $securesettings = @{
