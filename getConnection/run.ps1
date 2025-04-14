@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request, $TriggerMetadata)
 
 # Write to the Azure Functions log stream.
-Write-Output "PowerShell HTTP trigger function processed a request."
+Write-Information "PowerShell HTTP trigger function processed a request."
 
 $rdpfile = @'
 authentication level:i:0
@@ -60,23 +60,23 @@ enablerdsaadauth:i:0
 #$Request.Headers["x-ms-client-principal-name"] = $Request.Headers["x-ms-client-principal-name"]
 
 <#
-Write-Output "rdgwfedauth_hostname = $($Request.params.hostname)"
-Write-Output "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
-Write-Output "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-name"])"
+Write-Information "rdgwfedauth_hostname = $($Request.params.hostname)"
+Write-Information "rdgwfedauth_gwhost = $($env:APPSETTING_rdgwfedauth_gwhost)"
+Write-Information "rdgwfedauth_username = $($Request.Headers["x-ms-client-principal-name"])"
 
-Write-Output '$Request.Headers'
+Write-Information '$Request.Headers'
 $Request.Headers.keys |
 Select-Object @{Name="Key";Expression={$_}},@{Name="Value";Expression={$Request.Headers[$_]}}
-Write-Output 'end $Request.Headers'
-Write-Output 'Env:'
+Write-Information 'end $Request.Headers'
+Write-Information 'Env:'
 Get-ChildItem env:\*
-Write-Output 'end Env:'
+Write-Information 'end Env:'
 #>
 
 $Response = $null
 
 if (-not ($env:APPSETTING_rdgwfedauth_gwhost)) {
-    Write-Output "Failure: Missing env APPSETTING_rdgwfedauth_gwhost"
+    Write-Information "Failure: Missing env APPSETTING_rdgwfedauth_gwhost"
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::InternalServerError
         Body = "Internal server error.  Required configuration keys are missing."
@@ -84,7 +84,7 @@ if (-not ($env:APPSETTING_rdgwfedauth_gwhost)) {
 }
 
 if (-not $Request.Headers["x-ms-client-principal-name"]) {
-    Write-Output "Failure: Missing header x-ms-client-principal-name"
+    Write-Information "Failure: Missing header x-ms-client-principal-name"
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::Unauthorized
         Body = "Unauthorized.  Client principal name is missing from token."
@@ -92,7 +92,7 @@ if (-not $Request.Headers["x-ms-client-principal-name"]) {
 }
 
 if (-not ($Request.params.hostname -match '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$')) {
-    Write-Output "Failure: Hostname mismatches regex"
+    Write-Information "Failure: Hostname mismatches regex"
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::BadRequest
         Body = "Bad Request.  Host name not valid: $($Request.params.hostname)"
@@ -101,7 +101,7 @@ if (-not ($Request.params.hostname -match '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9
 
 <#
 if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"])) {
-    Write-Output "Failure: Unidentified"
+    Write-Information "Failure: Unidentified"
     $Response = ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::InternalServerError
         Body = "Internal server error.  Unidentified failure."
@@ -109,7 +109,7 @@ if (-not ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rd
 }
 #>
 
-Write-Output "Almost to processing"
+Write-Information "Almost to processing"
 
 if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfedauth_gwhost -and $Request.Headers["x-ms-client-principal-name"]) {
     # connect to key vault
@@ -196,7 +196,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
 if ($Response) {
     Push-OutputBinding -Name Response -Value $Response
 } else {
-    Write-Output "Failure: response missing, this should not happen"
+    Write-Information "Failure: response missing, this should not happen"
 }
 
 <#

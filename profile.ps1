@@ -77,12 +77,14 @@ function Get-RdGwToken
     }
     Process
     {
-        Write-Information $machinehost
-        Write-Information $port
-        Write-Information (Get-PosixLifetime)
+        Write-Information "machinehost $machinehost"
+        Write-Information "port $port"
+        Write-Information "posixlifetime $(Get-PosixLifetime)"
 
         $machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
+        Write-Information "machineToken $machineToken" 
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
+        Write-Information "machineTokenBuffer len $($machineToken.length)" 
 
         if (!$env:rdgwfedauth_keyvaultkey) {
             switch ($PSCmdlet.ParameterSetName) {
@@ -112,8 +114,10 @@ function Get-RdGwToken
             $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
 
             $queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/$rdgwfedauth_keyvaultkey/encrypt?api-version=2016-10-01"
+            Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenBuffer }
+            Write-Information $body
             $machineTokenSignature = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
             Select-Object -ExpandProperty Value
 
