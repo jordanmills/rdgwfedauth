@@ -51,14 +51,21 @@ function Get-RdGwToken
         [ValidateNotNullOrEmpty()]
         [string]$Thumbprint,
 
+        [Parameter(Mandatory, Position=0, ParameterSetName='keyname')]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [switch]$KeyVault,
+
         [Parameter(Mandatory, Position=1, ParameterSetName='certificate')]
         [Parameter(Mandatory, Position=1, ParameterSetName='thumbprint')]
+        [Parameter(Mandatory, Position=1, ParameterSetName='keyname')]
         [string]
         $machinehost,
 
         # Param3 help description
         [Parameter(Position=2,ParameterSetName='certificate')]
         [Parameter(Position=2,ParameterSetName='thumbprint')]
+        [Parameter(Position=2,ParameterSetName='keyname')]
         [AllowNull()]
         [ValidateRange(0,65535)]
         [int]
@@ -70,27 +77,44 @@ function Get-RdGwToken
     }
     Process
     {
-        #[System.Security.Cryptography.X509Certificates.X509Certificate2]
         $machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
-        switch ($PSCmdlet.ParameterSetName) {
-            "thumbprint" {
-                [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = Get-Item "Cert:\currentUser\my\$thumbprint"
-                $RSACng = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($Certificate)
-                $machineTokenSignature = $RSACng.SignData(
-                    $machineTokenBuffer, 
-                    [System.Security.Cryptography.HashAlgorithmName]::SHA256, 
-                    [System.Security.Cryptography.RSASignaturePadding]::Pss
-                )
 
+        if (!$env:rdgwfedauth_keyvaultkey) {
+            switch ($PSCmdlet.ParameterSetName) {
+                "thumbprint" {
+                    [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = Get-Item "Cert:\currentUser\my\$thumbprint"
+                    $RSACng = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($Certificate)
+                    $machineTokenSignature = $RSACng.SignData(
+                        $machineTokenBuffer, 
+                        [System.Security.Cryptography.HashAlgorithmName]::SHA256, 
+                        [System.Security.Cryptography.RSASignaturePadding]::Pss
+                    )
+
+                }
+                "certificate" {
+                    exit "Not implemented"
+                }
+                "KeyVault" {
+                    # got a key name paramter 
+                    exit "Not implemented for local execution."
+                }
+                default {
+                    exit "Unspecified error"
+                }
             }
-            "certificate" {
-                exit "Not implemented"
-            }
-            default {
-                exit "Unspecified error"
-            }
+        } else {
+            # in azure running against key vault
+            $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
+
+            $queryUrl = "$resourceURI$rdgwfedauth_keyvaultkey/encrypt?api-version=2016-10-01"
+            $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+            $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenBuffer }
+            $machineTokenSignature = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
+            Select-Object -ExpandProperty Value
+
         }
+
         $machineTokenString = [string]::Format(
             [CultureInfo]::InvariantCulture, 
             $AUTH_TOKEN_PATTERN, 
@@ -98,20 +122,7 @@ function Get-RdGwToken
             $thishumbprint, 
             [uri]::EscapeDataString([System.Convert]::ToBase64String($machineTokenSignature))
         );
-        # rest from here https://blog.ahasayen.com/how-to-use-azure-key-vault-with-powershell-to-encrypt-data
-        # need $keyid, from config?
-        # need $accesstoken
-
-        $resourceURI = "https://<Entra-resource-URI-for-resource-to-obtain-token>"
-        $tokenAuthURI = $env:IDENTITY_ENDPOINT + "?resource=$resourceURI&api-version=2019-08-01"
-        $tokenResponse = Invoke-RestMethod -Method Get -Headers @{"X-IDENTITY-HEADER"="$env:IDENTITY_HEADER"} -Uri $tokenAuthURI
-        $accessToken = $tokenResponse.access_token
-
-        $queryUrl = $rdgw_keyvaultkey + '/encrypt?api-version=2016-10-01'
-        $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-        $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $base64Array }
-        Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
-        Select-Object -ExpandProperty Value
+        $machineTokenString 
     }
     End
     {
@@ -131,6 +142,14 @@ function Get-AzureResourceToken {
         [ValidateNotNullOrEmpty()]
         [uri]$resourceURI
     )
+
+    $resourceURI = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
+    $tokenAuthURI = $env:IDENTITY_ENDPOINT + "?resource=$resourceURI&api-version=2019-08-01"
+    $tokenResponse = Invoke-RestMethod -Method Get -Headers @{"X-IDENTITY-HEADER"="$env:IDENTITY_HEADER"} -Uri $tokenAuthURI
+    $tokenResponse.access_token # return this
+
+    # this is for token caching, which we can do later.
+    <#
     if ((Get-Date $Request.Headers["x-ms-token-aad-expires-on"]) -gt (Get-Date)) {
         if ($global:tokenResponse[$resourceURI]) {
             $global:tokenResponse[$resourceURI]
@@ -141,6 +160,7 @@ function Get-AzureResourceToken {
             $thistoken
         }
     } else { Write-Error "Token expired" }
+    #>
 }
 
 function Get-PosixLifetime
