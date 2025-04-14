@@ -107,7 +107,7 @@ function Get-RdGwToken
             # in azure running against key vault
             $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
 
-            $queryUrl = "$resourceURI$rdgwfedauth_keyvaultkey/encrypt?api-version=2016-10-01"
+            $queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/$rdgwfedauth_keyvaultkey/encrypt?api-version=2016-10-01"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenBuffer }
             $machineTokenSignature = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
