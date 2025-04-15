@@ -21,7 +21,7 @@ if ($env:MSI_SECRET) {
 
 # You can also define functions or aliases that can be referenced in any of your PowerShell functions.
 
-$AZURE_MANAGEMENT_API = "https://management.azure.com/";
+#$AZURE_MANAGEMENT_API = "https://management.azure.com/";
 $MACHINE_TOKEN_PATTERN = "Host={0}&Port={1}&ExpiresOn={2}";
 $AUTH_TOKEN_PATTERN = "{0}&Signature=1|SHA256|{1}|{2}";
 $rdgw_loginEndpoint = $env:rdgw_loginEndpoint # "https://login.microsoftonline.com/"; # $env:rdgw_loginEndpoint, should be pushed in template from environment().authentication.loginEndpoint
@@ -83,7 +83,8 @@ function Get-RdGwToken
 
         #$machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
         $machineToken = $MACHINE_TOKEN_PATTERN -f $machinehost, $port, (Get-PosixLifetime)
-        Write-Information "machineToken $machineToken" 
+        Write-Information "machineToken [$machineToken]"
+        if (-not $machineToken) { exit "unknown failure, empty machine token" }
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
         #Write-Information "machineTokenBuffer len $($machineToken.length)" 
         
@@ -112,7 +113,7 @@ function Get-RdGwToken
         } else {
             # in azure running against key vault
             $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-            Write-Information $accessToken
+            #Write-Information $accessToken
             
             # then perform the signing
             $queryurl = 'https://{0}{1}/keys/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
@@ -222,9 +223,11 @@ function Get-PosixLifetime
 
 # pre-cache token signing certificate thumbprint
 # in azure running against key vault
+Write-Information "Initializing function"
 $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
 $queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
-Write-Information "token signing certificate queryUrl $queryUrl"
+Write-Information ('token signing certificate queryUrl {0}' -f $queryUrl)
 $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
 $certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
 $global:thumbprint = ([System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))).Thumbprint
+Write-Information ('global:thumbprint {0}' -f $global:thumbprint)
