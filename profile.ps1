@@ -90,7 +90,8 @@ function Get-RdGwToken
         Write-Information "port $port"
         Write-Information "posixlifetime $(Get-PosixLifetime)"
 
-        $machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
+        #$machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
+        $machineToken = $MACHINE_TOKEN_PATTERN -f $machinehost, $port, (Get-PosixLifetime)
         Write-Information "machineToken $machineToken" 
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
         #Write-Information "machineTokenBuffer len $($machineToken.length)" 
