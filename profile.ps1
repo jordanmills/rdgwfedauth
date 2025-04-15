@@ -115,7 +115,7 @@ function Get-RdGwToken
             Write-Information $accessToken
             
             # then perform the signing
-            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
+            $queryurl = 'https://{0}{1}/keys/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             
