@@ -105,7 +105,6 @@ function Get-RdGwToken
                         [System.Security.Cryptography.HashAlgorithmName]::SHA256, 
                         [System.Security.Cryptography.RSASignaturePadding]::Pss
                     )
-
                 }
                 "certificate" {
                     exit "Not implemented"
@@ -121,14 +120,22 @@ function Get-RdGwToken
         } else {
             # in azure running against key vault
             $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-    
-            # then perform the encryption
+
+            
+            # then perform the signing
             $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-            $machineTokenEncoded = [System.Convert]::ToBase64String($machineTokenBuffer)
-            Write-Information "machineTokenEncoded $machineTokenEncoded"
-            $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenEncoded }
+            
+            # hash the machinetoken
+            #$machineTokenEncoded = [System.Convert]::ToBase64String($machineTokenBuffer)
+            $stream = [System.IO.MemoryStream]::new($machineTokenBuffer)
+            $machinetokenhash = (Get-FileHash -InputStream $stream).Hash
+            Remove-Variable stream
+            $machineTokenEncoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($machinetokenhash))
+            
+            $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+            $body = ConvertTo-Json -InputObject @{ "alg" = "RS512"; "value" = $machineTokenEncoded }
             Write-Information $body
             $machineTokenResponse = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body 
             $machineTokenSignature = $machineTokenResponse | Select-Object -ExpandProperty Value
@@ -143,10 +150,10 @@ function Get-RdGwToken
             $AUTH_TOKEN_PATTERN, 
             $machineToken, 
             $global:thumbprint, 
-            [uri]::EscapeDataString([System.Convert]::ToBase64String($machineTokenSignature))
+            [uri]::EscapeDataString([System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($machineTokenSignature)))
         );
         Write-Information "authTokenString $authTokenString" 
-        $authTokenString 
+        $authTokenString
     }
     End
     {
