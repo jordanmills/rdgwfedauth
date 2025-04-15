@@ -36,9 +36,8 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 
 # pre-cache token signing certificate thumbprint
 # in azure running against key vault
-$accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
-#$queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/certificates/$rdgwfedauth_keyvaultkey`?api-version=7.4"
-$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$($env:rdgwfedauth_keyvaultDns),$rdgwfedauth_keyvaultkey
+$accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
+$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
 Write-Information "token signing certificate queryUrl $queryUrl"
 $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
 $certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
@@ -94,8 +93,8 @@ function Get-RdGwToken
         $machineToken = [string]::Format([CultureInfo]::InvariantCulture, $MACHINE_TOKEN_PATTERN, $machinehost, $port, (Get-PosixLifetime));
         Write-Information "machineToken $machineToken" 
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
-        Write-Information "machineTokenBuffer len $($machineToken.length)" 
-
+        #Write-Information "machineTokenBuffer len $($machineToken.length)" 
+        
         if (!$env:rdgwfedauth_keyvaultkey) {
             switch ($PSCmdlet.ParameterSetName) {
                 "thumbprint" {
@@ -122,19 +121,21 @@ function Get-RdGwToken
         } else {
             # in azure running against key vault
             $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-
+    
             # then perform the encryption
-            $queryurl = 'https://{0}{1}/certificates/{2}/encrypt?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
+            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-            $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenBuffer }
+            $machineTokenEncoded = [System.Convert]::ToBase64String($machineTokenBuffer)
+            Write-Information "machineTokenEncoded $machineTokenEncoded"
+            $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenEncoded }
             Write-Information $body
-            $machineTokenSignature = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
-            Select-Object -ExpandProperty Value
+            $machineTokenResponse = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body 
+            $machineTokenSignature = $machineTokenResponse | Select-Object -ExpandProperty Value
         }
 
-        Write-Information "AUTH_TOKEN_PATTERN $machineTokenString" 
-        Write-Information "machineToken $machineTokenString" 
+        Write-Information "AUTH_TOKEN_PATTERN $AUTH_TOKEN_PATTERN" 
+        Write-Information "machineToken $machineTokenSignature" 
         Write-Information "global:thumbprint $global:thumbprint" 
 
         $authTokenString = [string]::Format(
