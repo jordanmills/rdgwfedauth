@@ -37,7 +37,7 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 # pre-cache token signing certificate thumbprint
 # in azure running against key vault
 $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkeyname
+$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
 Write-Information "token signing certificate queryUrl $queryUrl"
 $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
 $certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
@@ -123,7 +123,7 @@ function Get-RdGwToken
 
             
             # then perform the signing
-            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkeyname
+            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             
