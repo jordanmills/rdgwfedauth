@@ -130,6 +130,7 @@ function Get-RdGwToken
             $body = ConvertTo-Json -InputObject @{ "alg" = "RS512"; "value" = $machineTokenEncoded }
             Write-Information $body
             $machineTokenResponse = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body 
+            Write-Information $machineTokenResponse
             $machineTokenSignature = $machineTokenResponse | Select-Object -ExpandProperty Value
         }
 
