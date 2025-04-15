@@ -177,20 +177,30 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         }
     }
 
-    $rdgwtoken = Get-RdGwToken -KeyVault -Machinehost $Request.params.hostname
+    Try {
+            $rdgwtoken = Get-RdGwToken -KeyVault -Machinehost $Request.params.hostname
+    } 
+    Catch {
+    }
+    if ($rdgwtoken) {
+        $rdpfile_output += "full address:s:$($Request.params.hostname)`r`n"
+        $rdpfile_output += "alternate full address:s:$($Request.params.hostname)`r`n"
+        $rdpfile_output += "gatewayhostname:s:$($env:APPSETTING_rdgwfedauth_gwhost)`r`n"
+        $rdpfile_output += "username:s:$($Request.Headers["x-ms-client-principal-name"])`r`n"
+        $rdpfile_output += "gatewaycredentialssource:i:1`r`n"
+        $rdpfile_output += "gatewayaccesstoken:s:$rdgwtoken`r`n"
 
-    $rdpfile_output += "full address:s:$($Request.params.hostname)`r`n"
-    $rdpfile_output += "alternate full address:s:$($Request.params.hostname)`r`n"
-    $rdpfile_output += "gatewayhostname:s:$($env:APPSETTING_rdgwfedauth_gwhost)`r`n"
-    $rdpfile_output += "username:s:$($Request.Headers["x-ms-client-principal-name"])`r`n"
-    $rdpfile_output += "gatewaycredentialssource:i:1`r`n"
-    $rdpfile_output += "gatewayaccesstoken:s:$rdgwtoken`r`n"
-
-    $Response = ([HttpResponseContext]@{
-        StatusCode = [HttpStatusCode]::OK
-        Body = $rdpfile_output #$content.replace('{0}',$Request.params.hostname).replace('{1}',$env:APPSETTING_rdgwfedauth_gwhost).replace('{2}',$Request.Headers["x-ms-client-principal-name"])
-        #ContentType = 'application/octet-stream'
-    })
+        $Response = ([HttpResponseContext]@{
+            StatusCode = [HttpStatusCode]::OK
+            Body = $rdpfile_output
+        })
+    } else {
+        Write-Information "Failure: Token not returned"
+        $Response = ([HttpResponseContext]@{
+            StatusCode = [HttpStatusCode]::InternalServerError
+            Body = "Unknown failure requesting token."
+        })
+    }
 }
 
 if ($Response) {
