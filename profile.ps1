@@ -37,10 +37,11 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 # pre-cache token signing certificate thumbprint
 # in azure running against key vault
 $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
-$queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/certificates/$rdgwfedauth_keyvaultkey`?api-version=7.4"
+#$queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/certificates/$rdgwfedauth_keyvaultkey`?api-version=7.4"
+$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$($env:rdgwfedauth_keyvaultDns),$rdgwfedauth_keyvaultkey
 Write-Information "token signing certificate queryUrl $queryUrl"
 $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-$certificateenvelope = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body
+$certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
 $global:thumbprint = ([System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))).Thumbprint
 
 function Get-RdGwToken
@@ -120,10 +121,10 @@ function Get-RdGwToken
             }
         } else {
             # in azure running against key vault
-            $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
+            $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
 
             # then perform the encryption
-            $queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/$rdgwfedauth_keyvaultkey/encrypt?api-version=7.4"
+            $queryurl = 'https://{0}{1}/certificates/{2}/encrypt?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             $body = ConvertTo-Json -InputObject @{ "alg" = "RSA-OAEP"; "value" = $machineTokenBuffer }
