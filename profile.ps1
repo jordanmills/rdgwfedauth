@@ -34,15 +34,6 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 #$AzureServiceTokenProvider AzureManagementApiTokenProvider = new AzureServiceTokenProvider();
 [DateTime]$PosixBaseTime = [DateTime]::new(1970, 1, 1, 0, 0, 0, 0)
 
-# pre-cache token signing certificate thumbprint
-# in azure running against key vault
-$accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
-Write-Information "token signing certificate queryUrl $queryUrl"
-$headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-$certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
-$global:thumbprint = ([System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))).Thumbprint
-
 function Get-RdGwToken
 {
     [CmdletBinding(DefaultParameterSetName='certificate')]
@@ -228,3 +219,11 @@ function Get-PosixLifetime
     }
 }
 
+# pre-cache token signing certificate thumbprint
+# in azure running against key vault
+$accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
+$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$env:rdgwfedauth_keyvaultkeyname
+Write-Information "token signing certificate queryUrl $queryUrl"
+$headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+$certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
+$global:thumbprint = ([System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))).Thumbprint
