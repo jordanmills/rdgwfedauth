@@ -177,11 +177,8 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         }
     }
 
-    Try {
-            $rdgwtoken = Get-RdGwToken -KeyVault -Machinehost $Request.params.hostname
-    } 
-    Catch {
-    }
+    $rdgwtoken = Get-RdGwToken -KeyVault -Machinehost $Request.params.hostname
+
     if ($rdgwtoken) {
         $rdpfile_output += "full address:s:$($Request.params.hostname)`r`n"
         $rdpfile_output += "alternate full address:s:$($Request.params.hostname)`r`n"
