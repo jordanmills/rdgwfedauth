@@ -37,7 +37,7 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 # pre-cache token signing certificate thumbprint
 # in azure running against key vault
 $accessToken = Get-AzureResourceToken -resourceURI ('https://{0}{1}/' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns)
-$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
+$queryurl = 'https://{0}{1}/certificates/{2}?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkeyname
 Write-Information "token signing certificate queryUrl $queryUrl"
 $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
 $certificateenvelope = Invoke-RestMethod -Method Get -UseBasicParsing -Uri $queryUrl -Headers $headers
@@ -95,7 +95,7 @@ function Get-RdGwToken
         $machineTokenBuffer = [System.Text.Encoding]::ASCII.GetBytes($machineToken);
         #Write-Information "machineTokenBuffer len $($machineToken.length)" 
         
-        if (!$env:rdgwfedauth_keyvaultkey) {
+        if (!$env:rdgwfedauth_keyvaultkeyname) {
             switch ($PSCmdlet.ParameterSetName) {
                 "thumbprint" {
                     [System.Security.Cryptography.X509Certificates.X509Certificate2]$Certificate = Get-Item "Cert:\currentUser\my\$thumbprint"
@@ -123,7 +123,7 @@ function Get-RdGwToken
 
             
             # then perform the signing
-            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkey
+            $queryurl = 'https://{0}{1}/certificates/{2}/sign?api-version=7.4' -f $env:rdgwfedauth_keyvaultName,$env:rdgwfedauth_keyvaultDns,$rdgwfedauth_keyvaultkeyname
             Write-Information "queryUrl $queryUrl"
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             
