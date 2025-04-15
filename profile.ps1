@@ -34,6 +34,15 @@ $global:tokenresponse = @{} # hashtable to keep token responses for reuse
 #$AzureServiceTokenProvider AzureManagementApiTokenProvider = new AzureServiceTokenProvider();
 [DateTime]$PosixBaseTime = [DateTime]::new(1970, 1, 1, 0, 0, 0, 0)
 
+# pre-cache token signing certificate thumbprint
+# in azure running against key vault
+$accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
+$queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/certificates/$rdgwfedauth_keyvaultkey?api-version=7.4"
+Write-Information "token signing certificate queryUrl $queryUrl"
+$headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
+$certificateenvelope = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body
+$global:thumbprint = ([System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))).Thumbprint
+
 function Get-RdGwToken
 {
     [CmdletBinding(DefaultParameterSetName='certificate')]
@@ -113,13 +122,6 @@ function Get-RdGwToken
             # in azure running against key vault
             $accessToken = Get-AzureResourceToken -resourceURI "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/"
 
-            # get the thumbprint
-            $queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/certificates/$rdgwfedauth_keyvaultkey?api-version=7.4"
-            Write-Information "queryUrl $queryUrl"
-            $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-            $certificateenvelope = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body
-            $thisthumbprint = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new([System.Convert]::FromBase64String($certificateenvelope.cer))
-
             # then perform the encryption
             $queryUrl = "https://$($env:rdgwfedauth_keyvaultName)$($env:rdgwfedauth_keyvaultDns)/$rdgwfedauth_keyvaultkey/encrypt?api-version=7.4"
             Write-Information "queryUrl $queryUrl"
@@ -128,22 +130,21 @@ function Get-RdGwToken
             Write-Information $body
             $machineTokenSignature = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body |
             Select-Object -ExpandProperty Value
-
         }
 
         Write-Information "AUTH_TOKEN_PATTERN $machineTokenString" 
         Write-Information "machineToken $machineTokenString" 
-        Write-Information "thisthumbprint $thisthumbprint" 
+        Write-Information "global:thumbprint $global:thumbprint" 
 
-        $machineTokenString = [string]::Format(
+        $authTokenString = [string]::Format(
             [CultureInfo]::InvariantCulture, 
             $AUTH_TOKEN_PATTERN, 
             $machineToken, 
-            $thisthumbprint, 
+            $global:thumbprint, 
             [uri]::EscapeDataString([System.Convert]::ToBase64String($machineTokenSignature))
         );
-        Write-Information "machineTokenString $machineTokenString" 
-        $machineTokenString 
+        Write-Information "authTokenString $authTokenString" 
+        $authTokenString 
     }
     End
     {
