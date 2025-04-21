@@ -173,6 +173,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
     $rdpfile_output = $rdpfile.split("[`r`n]") |
     ForEach-Object {
         if (-not $securesettings.ContainsKey($_.split(":",3)[0]) ) {
+            Write-Information "Adding line $_"
             $rdpfile_output += "$_`r`n"
         }
     }
@@ -184,6 +185,7 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
         $rdpfile_output += "alternate full address:s:$($Request.params.hostname)`r`n"
         $rdpfile_output += "gatewayhostname:s:$($env:APPSETTING_rdgwfedauth_gwhost)`r`n"
         $rdpfile_output += "username:s:$($Request.Headers["x-ms-client-principal-name"])`r`n"
+        $rdpfile_output += "gatewayusagemethod:i:1`r`n"
         $rdpfile_output += "gatewaycredentialssource:i:5`r`n"
         $rdpfile_output += "gatewayaccesstoken:s:$rdgwtoken`r`n"
 
