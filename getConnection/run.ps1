@@ -54,7 +54,7 @@ gatewaybrokeringtype:i:0/
 redirectwebauthn:i:1/
 enablerdsaadauth:i:0/
 gatewayaccesstoken:s:{3}
-'@.split("/").where({$_}) | ForEach-Object { $_.trim() } | ForEach-Object { "$_`r`n" }
+'@.split("/").where({$_})
 
 #$Request.params.hostname = $Request.params.hostname
 #$env:APPSETTING_rdgwfedauth_gwhost = $env:APPSETTING_rdgwfedauth_gwhost
