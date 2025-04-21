@@ -37,9 +37,9 @@ remoteapplicationmode:i:0/
 alternate shell:s:/
 shell working directory:s:/
 gatewayusagemethod:i:1/
-gatewaycredentialssource:i:0/
+gatewaycredentialssource:i:5/
 gatewayprofileusagemethod:i:1/
-promptcredentialonce:i:1/
+promptcredentialonce:i:0/
 audiocapturemode:i:0/
 videoplaybackmode:i:1/
 connection type:i:2/
