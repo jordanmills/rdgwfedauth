@@ -200,7 +200,7 @@ function Get-PosixLifetime
                    ParameterSetName='seconds')]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
-        [int]$Seconds=60
+        [int]$Seconds=3600
     )
 
     Begin
