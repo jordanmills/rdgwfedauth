@@ -172,8 +172,8 @@ if ((-not $Response) -and $Request.params.hostname -and $env:APPSETTING_rdgwfeda
     
     $rdpfile_output = $rdpfile.split("[`r`n]") |
     ForEach-Object {
+        Write-Information "Processing line $_"
         if (-not $securesettings.ContainsKey($_.split(":",3)[0]) ) {
-            Write-Information "Adding line $_"
             $rdpfile_output += "$_`r`n"
         }
     }
