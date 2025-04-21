@@ -17,43 +17,43 @@ prompt for credentials:i:1
 '@
 
 $rdpfile = @'
-full address:s:{1}
-alternate full address:s:{1}
-username:s:{2}
-gatewayhostname:s:{0}
-screen mode id:i:2
-audiomode:i:0
-redirectprinters:i:0
-redirectcomports:i:0
-redirectsmartcards:i:1
-redirectclipboard:i:1
-redirectposdevices:i:0
-drivestoredirect:s:*
-autoreconnection enabled:i:1
-authentication level:i:0
-prompt for credentials:i:0
-negotiate security layer:i:1
-remoteapplicationmode:i:0
-alternate shell:s:
-shell working directory:s:
-gatewayusagemethod:i:1
-gatewaycredentialssource:i:0
-gatewayprofileusagemethod:i:1
-promptcredentialonce:i:1
-audiocapturemode:i:0
-videoplaybackmode:i:1
-connection type:i:2
-redirectdirectx:i:1
-use redirection server name:i:0
-networkautodetect:i:1
-bandwidthautodetect:i:1
-enableworkspacereconnect:i:0
-rdgiskdcproxy:i:0
-kdcproxyname:s:
-gatewaybrokeringtype:i:0
-redirectwebauthn:i:1
+full address:s:{1}/
+alternate full address:s:{1}/
+username:s:{2}/
+gatewayhostname:s:{0}/
+screen mode id:i:2/
+audiomode:i:0/
+redirectprinters:i:0/
+redirectcomports:i:0/
+redirectsmartcards:i:1/
+redirectclipboard:i:1/
+redirectposdevices:i:0/
+drivestoredirect:s:*/
+autoreconnection enabled:i:1/
+authentication level:i:0/
+prompt for credentials:i:0/
+negotiate security layer:i:1/
+remoteapplicationmode:i:0/
+alternate shell:s:/
+shell working directory:s:/
+gatewayusagemethod:i:1/
+gatewaycredentialssource:i:0/
+gatewayprofileusagemethod:i:1/
+promptcredentialonce:i:1/
+audiocapturemode:i:0/
+videoplaybackmode:i:1/
+connection type:i:2/
+redirectdirectx:i:1/
+use redirection server name:i:0/
+networkautodetect:i:1/
+bandwidthautodetect:i:1/
+enableworkspacereconnect:i:0/
+rdgiskdcproxy:i:0/
+kdcproxyname:s:/
+gatewaybrokeringtype:i:0/
+redirectwebauthn:i:1/
 enablerdsaadauth:i:0
-'@.split("`r`n").where({$_})
+'@.split("/").where({$_})
 
 #$Request.params.hostname = $Request.params.hostname
 #$env:APPSETTING_rdgwfedauth_gwhost = $env:APPSETTING_rdgwfedauth_gwhost
