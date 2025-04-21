@@ -52,7 +52,8 @@ rdgiskdcproxy:i:0/
 kdcproxyname:s:/
 gatewaybrokeringtype:i:0/
 redirectwebauthn:i:1/
-enablerdsaadauth:i:0
+enablerdsaadauth:i:0/
+gatewayaccesstoken:s:{3}
 '@.split("/").where({$_})
 
 #$Request.params.hostname = $Request.params.hostname
