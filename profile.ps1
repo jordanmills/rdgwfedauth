@@ -23,7 +23,8 @@ if ($env:MSI_SECRET) {
 
 #$AZURE_MANAGEMENT_API = "https://management.azure.com/";
 $MACHINE_TOKEN_PATTERN = "Host={0}&Port={1}&ExpiresOn={2}";
-$AUTH_TOKEN_PATTERN = "{0}&Signature=1|SHA256|{1}|{2}";
+#$AUTH_TOKEN_PATTERN = "{0}&Signature=1|SHA256|{1}|{2}";
+$AUTH_TOKEN_PATTERN = "svtusdfedauth\localuser&Signature=1|SHA256|{1}|{2}";
 $rdgw_loginEndpoint = $env:rdgw_loginEndpoint # "https://login.microsoftonline.com/"; # $env:rdgw_loginEndpoint, should be pushed in template from environment().authentication.loginEndpoint
 $rdgw_keyvaultDns = $env:rdgw_keyvaultDns # ".vault.azure.net"; # $env:rdgw_keyvaultDns, should be pushed in template from environment().suffixes.keyvaultDns
 $rdgw_keyvaultName = $env:rdgw_keyvaultName # "kv-usd-rdgwfedauth-tst"; # $env:rdgw_keyvaultDns, should be pushed in template from resource
