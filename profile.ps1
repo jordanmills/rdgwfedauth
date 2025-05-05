@@ -145,7 +145,7 @@ function Get-RdGwToken
             $AUTH_TOKEN_PATTERN, 
             $machineToken, 
             $global:thumbprint, 
-            [uri]::EscapeDataString([System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($machineTokenSignature)))
+            [uri]::EscapeDataString($machineTokenSignature)
         );
         Write-Information "authTokenString $authTokenString" 
         $authTokenString
