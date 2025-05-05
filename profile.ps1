@@ -77,6 +77,7 @@ function Get-RdGwToken
     }
     Process
     {
+        Write-Information "machinetokenpattern $MACHINE_TOKEN_PATTERN"
         Write-Information "machinehost $machinehost"
         Write-Information "port $port"
         Write-Information "posixlifetime $(Get-PosixLifetime)"
