@@ -128,7 +128,7 @@ function Get-RdGwToken
             $machineTokenEncoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($machinetokenhash))
             
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
-            $body = ConvertTo-Json -InputObject @{ "alg" = "RS512"; "value" = $machineTokenEncoded }
+            $body = ConvertTo-Json -InputObject @{ "alg" = "RS256"; "value" = $machineTokenEncoded }
             Write-Information $body
             $machineTokenResponse = Invoke-RestMethod -Method Post -UseBasicParsing -Uri $queryUrl -Headers $headers -Body $body 
             Write-Information $machineTokenResponse
