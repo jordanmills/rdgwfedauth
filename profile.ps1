@@ -123,9 +123,10 @@ function Get-RdGwToken
             # hash the machinetoken
             #$machineTokenEncoded = [System.Convert]::ToBase64String($machineTokenBuffer)
             $stream = [System.IO.MemoryStream]::new($machineTokenBuffer)
-            $machinetokenhash = (Get-FileHash -InputStream $stream).Hash
+            $machinetokenhashstring = (Get-FileHash -InputStream $stream).Hash
+            $machinetokenhash = [byte[]] -split ($machinetokenhashstring -replace '..', '0x$& ')
             Remove-Variable stream
-            $machineTokenEncoded = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($machinetokenhash))
+            $machineTokenEncoded = [System.Convert]::ToBase64String($machinetokenhash)
             
             $headers = @{ 'Authorization' = "Bearer $accessToken"; "Content-Type" = "application/json" }
             $body = ConvertTo-Json -InputObject @{ "alg" = "RS256"; "value" = $machineTokenEncoded }
